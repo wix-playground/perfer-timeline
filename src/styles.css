@@ -1,0 +1,77 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+form textarea {
+  width: 75%;
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: monospace;
+  line-height: 1.5;
+  margin-bottom: 1.6em;
+  max-width: 100%;
+  overflow: auto;
+  word-wrap: break-word;
+}
+
+form textarea.valid {
+  border-left: 3px solid green;
+}
+
+form textarea.invalid {
+  border-left: 5px solid red;
+}
+
+form input[type="submit"] {
+  width: 50%;
+  background-color: #4caf50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 25px;
+  text-align: center;
+  text-decoration: none;
+  margin: auto;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+form input[type="submit"]:disabled {
+  background-color: grey;
+  cursor: default;
+}
+
+.load-examples-button {
+  position: fixed;
+  top: 0.5em;
+  right: 0.5em;
+  /* transform: rotate(20deg); */
+}
+
+.load-examples-button button {
+  background-color: orange;
+  font-size: 1.2em;
+  padding: 5px;
+  border-radius: 10%;
+  cursor: pointer;
+  /* width: 150px; */
+}
+
+.timeline-container h3 {
+  padding: 5px;
+  background-color: lightgray;
+}
+
+.timeline-container [data-hook="name"] {
+  width: 50%;
+  margin: auto;
+  margin-top: 5px;
+  padding: 5px;
+}
