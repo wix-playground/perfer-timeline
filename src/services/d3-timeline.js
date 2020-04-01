@@ -1,8 +1,7 @@
-import $ from "jquery";
 import d3 from "d3";
 import "./d3-timeline-plugin";
 
-var width = 1500;
+var $ = selector => document.querySelector(selector);
 
 const colorsManager = (() => {
   const COLORS_MATRIX = {
@@ -17,7 +16,6 @@ const colorsManager = (() => {
         .domain(COLORS_MATRIX.domain),
     getDiffColor: (diff_type, defaultColor) => {
       const colorIndex = COLORS_MATRIX.domain.indexOf(diff_type);
-      console.log(`${diff_type}`);
       return colorIndex < 0 ? defaultColor : COLORS_MATRIX.range[colorIndex];
     },
     getSignleColor: () =>
@@ -29,9 +27,7 @@ const colorsManager = (() => {
 })();
 
 const buildText = d => {
-  var onHoverDisplay = `<strong>${d.key}</strong> (at ${
-    d.starting_time
-  } ms)<br>`;
+  var onHoverDisplay = `<strong>${d.key}</strong> (at ${d.starting_time} ms)<br>`;
   let diff = "";
   if (typeof d.diff === "number" && d.diff_type !== "same") {
     const regression = d.diff_type === "regression";
@@ -49,16 +45,15 @@ const buildText = d => {
 };
 
 const createOnHoverHandler = cotainerId => d => {
-  const root = $(`${cotainerId}_container`);
-  root
-    .find('[data-hook="name"]')
-    .css({
-      border: `3px dotted ${colorsManager.getDiffColor(d.diff_type, "#1f77b4")}`
-    })
-    .html(buildText(d));
+  const root = $(`${cotainerId}_container [data-hook="name"]`);
+  root.style = `border: 3px dotted ${colorsManager.getDiffColor(
+    d.diff_type,
+    "#1f77b4"
+  )}`;
+  root.innerHTML = buildText(d);
 };
 
-function buidBaseChart(cotainerId) {
+function buidBaseChart(cotainerId, width) {
   return (
     d3
       .timeline()
@@ -91,23 +86,36 @@ const normalizeDataTimestamps = data => {
   });
 };
 
-function attachChart(id, data, chartBuilder) {
+function attachChart(id, data = [], chartBuilder, width) {
   normalizeDataTimestamps(data);
   d3.select(id)
     .append("svg")
     .attr("width", width)
     .datum(data)
     .call(chartBuilder(id));
+  return () => {
+    $(`${id} svg`).remove();
+  };
 }
 
-export default function exec({ target, baseline }) {
-  attachChart(
+export default function exec(payload) {
+  const { target, baseline } = payload || {};
+  const width = document.documentElement.clientWidth * 0.8;
+  const cleanupBranch = attachChart(
     "#timeline_branch",
     target,
-    id => buidBaseChart(id).colors(colorsManager.getDiffsColorsScale())
-    // .colorProperty('diff_type')
+    id => buidBaseChart(id, width).colors(colorsManager.getDiffsColorsScale()),
+    width
   );
-  attachChart("#timeline_master", baseline, id =>
-    buidBaseChart(id).colors(colorsManager.getSignleColor())
+  const cleanupMaster = attachChart(
+    "#timeline_master",
+    baseline,
+    id => buidBaseChart(id, width).colors(colorsManager.getSignleColor()),
+    width
   );
+  // cleaup
+  return () => {
+    cleanupBranch();
+    cleanupMaster();
+  };
 }

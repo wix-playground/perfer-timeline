@@ -131,18 +131,9 @@ const transformTargetDiffs = (targetMarks, baselineMarks) => {
   });
 };
 
-export default function exec({ branchJSON, masterJSON }) {
-  // const [targetResult, baselineResult] = _.chain(
-  //   extractAllBenchmarks({ branchJSON, masterJSON })
-  // )
-  //   .map(extractMarks)
-  //   .map(mergeTimeline)
-  //   .map((targetTimeline, baselineTimeline) => [
-  //     transformTargetDiffs(targetTimeline, baselineTimeline),
-  //     baselineTimeline
-  //   ])
-  //   .map(buildMultiLevelTimeline)
-  //   .value();
+export default function exec(payload) {
+  if (!payload) return {};
+  const { branchJSON, masterJSON } = payload;
   const [targetMarks, baselineMarks] = _.map(
     extractAllBenchmarks({ branchJSON, masterJSON }),
     extractMarks

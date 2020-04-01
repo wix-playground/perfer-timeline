@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
-import { useGlobal } from "../store";
-import convertToTimelineData from "../core/perfer-to-d3-timeline";
-import execD3Timline from "../core/d3-timeline";
+import convertToTimelineData from "../services/perfer-to-d3-timeline";
+import execD3Timline from "../services/d3-timeline";
+import { usePerferData } from "../state/use-perfer-data.hook";
 
-const TimelinesContainer = () => (
-  <div className="timeline-container">
+const TimelinesContainer = ({ show }) => (
+  <div className={`timeline-container ${show ? "visibile" : "hidden"}`}>
     <h3>current branch</h3>
     <div id="timeline_branch" />
     <div id="timeline_branch_container">
@@ -19,17 +19,7 @@ const TimelinesContainer = () => (
 );
 
 export default function Timelines() {
-  const [state] = useGlobal(["timelines"]);
-
-  useEffect(() => {
-    if (state.timelines) {
-      const timelineData = convertToTimelineData(state.timelines);
-      execD3Timline(timelineData);
-    }
-  });
-
-  if (state.timelines) {
-    return <TimelinesContainer />;
-  }
-  return <div />;
+  const timelines = usePerferData();
+  useEffect(() => execD3Timline(convertToTimelineData(timelines)), [timelines]);
+  return <TimelinesContainer show={Boolean(timelines)} />;
 }
