@@ -12,7 +12,8 @@ const initialState = {
   loadStatus: {
     id: LOAD_STATUS.UNKNOWN,
     payload: null
-  }
+  },
+  benchmarkIndex: null
 };
 
 const actions = {
@@ -28,6 +29,13 @@ const actions = {
     store.setState({
       ...rest,
       loadStatus: { id, payload }
+    });
+  },
+  setBenchmarkIndex(store, value) {
+    const { benchmarkIndex, ...rest } = store.state;
+    store.setState({
+      ...rest,
+      benchmarkIndex: value
     });
   }
 };

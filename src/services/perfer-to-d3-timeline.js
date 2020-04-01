@@ -1,12 +1,11 @@
 import _ from "lodash";
 
-const extractAllBenchmarks = ({ branchJSON, masterJSON }) => {
+const extractAllBenchmarks = ({ branchJSON, masterJSON }, benchmarkIndex) => {
   const { benchmarks: branch } = branchJSON;
   const { benchmarks: master } = masterJSON;
-  const index = `__benchmarks__/render.browser.perf.js#ssrdev/tb-blank`; // TODO - support all benchmrks
   return {
-    target_benchmarks: branch[index],
-    baseline_benchmarks: master[index] // TODO - support all benchmrks
+    target_benchmarks: branch[benchmarkIndex],
+    baseline_benchmarks: master[benchmarkIndex] // TODO - support all benchmrks
   };
 };
 
@@ -131,11 +130,10 @@ const transformTargetDiffs = (targetMarks, baselineMarks) => {
   });
 };
 
-export default function exec(payload) {
-  if (!payload) return {};
-  const { branchJSON, masterJSON } = payload;
+export default function exec(timelines, benchmarkIndex) {
+  if (!benchmarkIndex || !timelines) return {};
   const [targetMarks, baselineMarks] = _.map(
-    extractAllBenchmarks({ branchJSON, masterJSON }),
+    extractAllBenchmarks(timelines, benchmarkIndex),
     extractMarks
   );
   const [targetTimeline, baselineTimeline] = _.map(

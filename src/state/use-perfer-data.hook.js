@@ -13,6 +13,9 @@ export const usePerferData = () => {
       })
       .catch(err => setLoadStatus({ id: LOAD_STATUS.FAILURE, payload: err }));
   }, []);
-  const [state] = useGlobal(["timelines"]); // listen to timelines changes
-  return state.timelines;
+  const [{ timelines, benchmarkIndex }] = useGlobal([
+    "timelines",
+    "benchmarkIndex"
+  ]); // listen to timelines changes
+  return { timelines, benchmarkIndex };
 };

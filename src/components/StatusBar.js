@@ -1,5 +1,5 @@
 import React from "react";
-import { useGlobal, LOAD_STATUS } from "../state/store";
+import { useGlobal, Store, LOAD_STATUS } from "../state/store";
 
 const STATUS_TEXT = {
   [LOAD_STATUS.UNKNOWN]: () => "👾 initializing...",
@@ -15,7 +15,11 @@ const ErrorData = ({ error }) => (
   </div>
 );
 
-const SuccessData = ({ branchName, commitHash }) => {
+const updateBenchmark = event => {
+  Store.actions.setBenchmarkIndex(event.target.value);
+};
+
+const SuccessData = ({ branchName, commitHash, benchmarks }) => {
   const PRnumber = branchName.split("/")[0];
   return (
     <div>
@@ -35,6 +39,18 @@ const SuccessData = ({ branchName, commitHash }) => {
       >
         {commitHash}
       </a>
+      <span>
+        , <b>for benchmark:</b>
+      </span>
+      <div>
+        <select onChange={updateBenchmark} id="benchmark">
+          {[""].concat(...Object.keys(benchmarks)).map(benchmark => (
+            <option key={benchmark} value={benchmark}>
+              {benchmark.replace("__benchmarks__/", "")}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 };
