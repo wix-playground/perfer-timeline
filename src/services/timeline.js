@@ -5,8 +5,8 @@ var $ = selector => document.querySelector(selector);
 
 const colorsManager = (() => {
   const COLORS_MATRIX = {
-    range: ["#a52a2a", "#90ee90", "#cdc1c5"],
-    domain: ["regression", "improvement", "same"]
+    range: ["#a52a2a", "#90ee90", "#cdc1c5", "#c2bd60"],
+    domain: ["regression", "improvement", "same", "new-mark"]
   };
   return {
     getDiffsColorsScale: () =>

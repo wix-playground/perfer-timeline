@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import convertToTimelineData from "../services/perfer-to-d3-timeline";
-import execD3Timline from "../services/d3-timeline";
+import execD3Timline from "../services/timeline";
 import { usePerferData } from "../state/use-perfer-data.hook";
 
 const TimelinesContainer = ({ show }) => {

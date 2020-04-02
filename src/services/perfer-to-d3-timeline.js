@@ -119,8 +119,11 @@ const transformTargetDiffs = (targetMarks, baselineMarks) => {
   return _.map(targetMarks, item => {
     const baseline = _.find(baselineMarks, { key: item.key });
     if (!baseline) {
-      console.warn(`found new event - '${item.key}'!`);
-      return;
+      return {
+        ...item,
+        diff: 0,
+        diff_type: "new-mark"
+      };
     }
     const diffData = applyDiffData(item, baseline);
     return {
