@@ -10,8 +10,13 @@ const STATUS_TEXT = {
 
 const ErrorData = ({ error }) => (
   <div>
-    <div>{"⚠️ failed to fetch data from perfer server, error was:"}</div>
-    <pre>{error}</pre>
+    <span>{`⚠️ failed to fetch data from perfer server; error is: `}</span>
+    <span className={"preformatted-text"}>{`${error}`}</span>
+    {error.includes("timeout") ? (
+      <div style={{ "font-weight": "bold" }}>
+        please make sure you're connected to wix VPN
+      </div>
+    ) : null}
   </div>
 );
 

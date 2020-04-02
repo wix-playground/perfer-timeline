@@ -34,3 +34,8 @@
 .status-bar-container.failure {
   background-color: lightcoral;
 }
+
+.preformatted-text {
+  font-family: monospace;
+  white-space: pre;
+}

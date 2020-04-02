@@ -22,9 +22,10 @@ const TimelinesContainer = ({ show }) => {
 
 export default function Timelines() {
   const { timelines, benchmarkIndex } = usePerferData();
-  useEffect(
-    () => execD3Timline(convertToTimelineData(timelines, benchmarkIndex)),
-    [timelines, benchmarkIndex]
-  );
+  useEffect(() => {
+    const d3Data = convertToTimelineData(timelines, benchmarkIndex);
+    const cleanupCharts = execD3Timline(d3Data);
+    return cleanupCharts;
+  }, [timelines, benchmarkIndex]);
   return <TimelinesContainer show={Boolean(timelines && benchmarkIndex)} />;
 }

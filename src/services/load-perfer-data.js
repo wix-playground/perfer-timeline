@@ -26,7 +26,9 @@ export const loadPerferData = async () => {
   const { branchJSONId, masterJSONId } = parseParams();
   const [branchJSON, masterJSON] = await Promise.all(
     [perferAPI(branchJSONId), perferAPI(masterJSONId)].map(async url => {
-      const { data } = await fetch(url);
+      const { data } = await fetch(url, {
+        timeout: 5000
+      });
       return data;
     })
   );
