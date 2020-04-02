@@ -29,7 +29,10 @@ const colorsManager = (() => {
 const buildText = d => {
   var onHoverDisplay = `<strong>${d.key}</strong> (at ${d.starting_time} ms)<br>`;
   let diff = "";
-  if (typeof d.diff === "number" && d.diff_type !== "same") {
+  if (
+    typeof d.diff === "number" &&
+    ["regression", "improvement"].includes(d.diff_type)
+  ) {
     const regression = d.diff_type === "regression";
     const symbol = regression ? "+" : "-";
     diff += `<span style="font-weight: bold; color: ${
