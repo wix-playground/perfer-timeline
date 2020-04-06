@@ -7,15 +7,17 @@ export const usePerferData = () => {
   useEffect(() => {
     setLoadStatus({ id: LOAD_STATUS.IN_PROGRESS });
     loadPerferData()
-      .then(payload => {
+      .then((payload) => {
         setTimelines(payload);
         setLoadStatus({ id: LOAD_STATUS.SUCCESS, payload });
       })
-      .catch(err => setLoadStatus({ id: LOAD_STATUS.FAILURE, payload: err }));
-  }, []);
-  const [{ timelines, benchmarkIndex }] = useGlobal([
+      .catch((err) => setLoadStatus({ id: LOAD_STATUS.FAILURE, payload: err }));
+  }, [setLoadStatus, setTimelines]);
+  const [{ timelines, benchmarkIndex, domainFilter }] = useGlobal([
     "timelines",
-    "benchmarkIndex"
+    "benchmarkIndex",
+    "domainFilter",
   ]); // listen to timelines changes
-  return { timelines, benchmarkIndex };
+  // TODO - why benchmarkIndex and domainFilter are here??
+  return { timelines, benchmarkIndex, domainFilter };
 };

@@ -39,3 +39,8 @@
   font-family: monospace;
   white-space: pre;
 }
+
+.success-data-container {
+  display: flex;
+  flex-direction: column;
+}

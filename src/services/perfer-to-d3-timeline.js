@@ -1,37 +1,59 @@
 import _ from "lodash";
+import { DOMAIN_FILTERS } from "../constants";
 
 const extractAllBenchmarks = ({ branchJSON, masterJSON }, benchmarkIndex) => {
   const { benchmarks: branch } = branchJSON;
   const { benchmarks: master } = masterJSON;
   return {
     target_benchmarks: branch[benchmarkIndex],
-    baseline_benchmarks: master[benchmarkIndex] // TODO - support all benchmrks
+    baseline_benchmarks: master[benchmarkIndex], // TODO - support all benchmrks
   };
 };
 
-const cleanFedopsMark = measureName => {
-  return measureName
-    .replace("[fedops]", "")
-    .replace(/(started|finished)$/, "")
-    .trim();
+const fedopsAppLoadingPhasePattern = /^\[fedops\].+(started|finished)$/;
+const fedopsInteractionPattern = /^platform_/;
+const wixCodePatterns = /^wixCode\//;
+const cleanFedopsInteractionPattern = (measureName) => {
+  let res = `${measureName}`;
+  if (fedopsAppLoadingPhasePattern.test(res)) {
+    res = res
+      .replace("[fedops]", `[${DOMAIN_FILTERS.CORE}] `)
+      .replace(/(started|finished)$/, "")
+      .trim();
+  }
+  if (fedopsInteractionPattern.test(res)) {
+    res = res
+      .replace(fedopsInteractionPattern, `[${DOMAIN_FILTERS.PLATOFRM}] `)
+      .replace(/\s(started|ended)$/, "");
+  }
+  if (wixCodePatterns.test(res)) {
+    res = res
+      .replace(wixCodePatterns, `[${DOMAIN_FILTERS.WIX_CODE}] `)
+      .replace(/\s(started|ended)$/, "");
+  }
+  return res.replace(wixCodePatterns, "").replace(/\s(started|ended)$/, "");
+};
+
+const isDomain = (key, domains) => {
+  return _.concat([], domains).some((domain) => key.startsWith(`[${domain}]`));
 };
 
 const extractMarks = ({ benchmark }) => {
   return _.chain(benchmark.medians.marks)
     .map(({ median }, measureName) => {
-      const key = cleanFedopsMark(measureName);
+      const key = cleanFedopsInteractionPattern(measureName);
       return { key, value: median };
     })
     .sortBy("value")
     .value();
 };
 
-const normalizeFloat = num => parseFloat(num.toFixed(2));
+const normalizeFloat = (num) => parseFloat(num.toFixed(2));
 
-const getItemType = item =>
+const getItemType = (item) =>
   typeof item.duration === "undefined" ? "mark" : "measure";
 
-const mergeTimeline = marks => {
+const mergeTimeline = (marks, domain) => {
   const founds = [];
   return _.chain(marks)
     .map((mark, i) => {
@@ -44,7 +66,7 @@ const mergeTimeline = marks => {
           ...mark,
           key: mark.key,
           starting_time: mark.value,
-          display: "circle"
+          display: "circle",
         };
       }
       founds.push(mark.key);
@@ -55,10 +77,16 @@ const mergeTimeline = marks => {
         key: mark.key,
         starting_time,
         ending_time,
-        duration: normalizeFloat(ending_time - starting_time)
+        duration: normalizeFloat(ending_time - starting_time),
       };
     })
     .compact()
+    .filter((item) => {
+      if (getItemType(item) === "mark" || !domain) {
+        return true;
+      }
+      return isDomain(item.key, domain);
+    })
     .sortBy("starting_time")
     .value();
 };
@@ -75,12 +103,12 @@ const isIntersect = (range1, range2) => {
   return iStart < iEnd;
 };
 
-const buildMultiLevelTimeline = flatTimeline => {
+const buildMultiLevelTimeline = (flatTimeline) => {
   let levels = [[], []];
   const addToLevel = (item, level) => {
     levels[level] = _.concat(levels[level] || [], item);
   };
-  _.forEach(flatTimeline, item => {
+  _.forEach(flatTimeline, (item) => {
     if (getItemType(item) === "mark") {
       addToLevel(item, 0);
       return;
@@ -96,7 +124,10 @@ const buildMultiLevelTimeline = flatTimeline => {
       }
     }
   });
-  return _.map(levels, level => ({ times: level }));
+  return _.map(levels, (level, i) => ({
+    times: level,
+    ...(i === 0 ? { label: "KPIs" } : {}),
+  }));
 };
 
 const applyDiffData = (targetItem, baselineItem) => {
@@ -111,29 +142,29 @@ const applyDiffData = (targetItem, baselineItem) => {
     : "same";
   return {
     diff: normalizeFloat(diff),
-    diff_type
+    diff_type,
   };
 };
 
 const transformTargetDiffs = (targetMarks, baselineMarks) => {
-  return _.map(targetMarks, item => {
+  return _.map(targetMarks, (item) => {
     const baseline = _.find(baselineMarks, { key: item.key });
     if (!baseline) {
       return {
         ...item,
         diff: 0,
-        diff_type: "new-mark"
+        diff_type: "new-mark",
       };
     }
     const diffData = applyDiffData(item, baseline);
     return {
       ...item,
-      ...diffData
+      ...diffData,
     };
   });
 };
 
-export default function exec(timelines, benchmarkIndex) {
+export default function exec(timelines, benchmarkIndex, domain) {
   if (!benchmarkIndex || !timelines) return {};
   const [targetMarks, baselineMarks] = _.map(
     extractAllBenchmarks(timelines, benchmarkIndex),
@@ -141,7 +172,7 @@ export default function exec(timelines, benchmarkIndex) {
   );
   const [targetTimeline, baselineTimeline] = _.map(
     [targetMarks, baselineMarks],
-    mergeTimeline
+    (marks) => mergeTimeline(marks, domain)
   );
   const __targetTimeline__ = transformTargetDiffs(
     targetTimeline,
@@ -153,6 +184,6 @@ export default function exec(timelines, benchmarkIndex) {
   );
   return {
     target: targetResult,
-    baseline: baselineResult
+    baseline: baselineResult,
   };
 }

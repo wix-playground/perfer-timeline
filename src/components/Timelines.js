@@ -21,11 +21,15 @@ const TimelinesContainer = ({ show }) => {
 };
 
 export default function Timelines() {
-  const { timelines, benchmarkIndex } = usePerferData();
+  const { timelines, benchmarkIndex, domainFilter } = usePerferData();
   useEffect(() => {
-    const d3Data = convertToTimelineData(timelines, benchmarkIndex);
+    const d3Data = convertToTimelineData(
+      timelines,
+      benchmarkIndex,
+      domainFilter
+    );
     const cleanupCharts = execD3Timline(d3Data);
     return cleanupCharts;
-  }, [timelines, benchmarkIndex]);
+  }, [timelines, benchmarkIndex, domainFilter]);
   return <TimelinesContainer show={Boolean(timelines && benchmarkIndex)} />;
 }
